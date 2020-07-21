@@ -15,6 +15,11 @@ def extract_from_image_line(data):
 
     return line
 
+def smooth(y, box_pts):
+    box = np.ones(box_pts)/box_pts
+    y_smooth = np.convolve(y, box, mode='same')
+    return y_smooth
+
 pdffile = "ecg_2020-07-09_12.17.pdf"
 
 doc = fitz.open(pdffile)
@@ -60,10 +65,10 @@ line += extract_from_image_line(A4)
 a, b = len(line) // 10, 8 * len(line) // 10
 
 
-
-
-
 G = np.asarray(line[a:b])
+G = smooth(G, 3)
+
+
 spread = G.max() - G.min()
 peaks, _ = find_peaks((G - G.mean()) * -1 + G.mean(), height=1.07 * G.mean())
 
